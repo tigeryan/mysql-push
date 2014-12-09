@@ -33,8 +33,36 @@
 
     <cffile action="append" file="C:\ColdFusionBuilder3\ColdFusion\cfusion\wwwroot\mysql-push\sendPush.log" output="#Now()#" />
 
-
 </cffunction>
+
+<cffunction name="getReport" access="remote" output="false" returns="string" returnformat="plain">
+
+    <cfquery name="getData" datasource="#application.datasource#">
+        SELECT *
+        FROM products
+        ORDER BY product_id DESC
+    </cfquery>
+
+    <cfsavecontent variable="html">
+        <table>
+            <tr>
+                <td>Product ID</td>
+                <td>Product</td>
+                <td>Price</td>
+            </tr>
+            <cfoutput query="getData">
+            <tr>
+                <td>#getData.product_id#</td>
+                <td>#getData.product_name#</td>
+                <td>#getData.product_price#</td>
+            </tr>
+            </cfoutput>
+        </table>
+    </cfsavecontent>
+
+    <cfreturn html />
+</cffunction>
+
 
 <!--- *** AUTHORIZATION & REGISTRATION *** --->
 <!--- This should be called via HTTPS
