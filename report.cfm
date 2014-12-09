@@ -28,14 +28,13 @@
 
     });
 
-
-            $.ajax({
-                type:"POST",
-                url: "http://127.0.0.1:8600/mysql-push/push.cfc?method=getReport"
-            })
-            .done(function ( res ) {
-                $("#report").html(res);
-            });
+    $.ajax({
+        type:"POST",
+        url: "http://127.0.0.1:8600/mysql-push/push.cfc?method=getReport"
+    })
+    .done(function ( res ) {
+        $("#report").html(res);
+    });
 
 
 
