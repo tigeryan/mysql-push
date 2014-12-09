@@ -1,5 +1,5 @@
 <cfcomponent>
-<cfset This.name = "TestApplication3">
+<cfset This.name = "TestApplication4">
 <cfset This.Sessionmanagement=true>
 <cfset This.Sessiontimeout="#createtimespan(0,0,10,0)#">
 <cfset This.applicationtimeout="#createtimespan(5,0,0,0)#">
@@ -13,7 +13,7 @@
         Application.availableResources=0;
         Application.counter1=1;
         Application.sessions=0;
-        Application.datasource = "mdlinx";
+        Application.datasource = "sixfoottiger";
     </cfscript>
 
 
@@ -28,20 +28,7 @@
 
 <cffunction name="onRequestStart">
 
-    <cfscript>
-        request.pusherAppID = "99452";
-        request.pusherKey = "7af9fad3df855a1968e5";
-        request.pusherSecret = "8dc08dc71ebb470ace7a";
-        // *********************************************************
 
-        // Create an instance of our pusher component using our demo
-        // credentials and the Crypto library.
-        request.pusher = new cfcs.Pusher(
-        appID = request.pusherAppID,
-        appKey = request.pusherKey,
-        appSecret = request.pusherSecret
-        );
-    </cfscript>
 
 
 </cffunction>

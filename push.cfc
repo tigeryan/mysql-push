@@ -7,6 +7,30 @@
 
 <cffunction name="sendPush" access="remote" output="false" returns="struct">
 
+    <cfscript>
+        request.pusherAppID = "99452";
+        request.pusherKey = "7af9fad3df855a1968e5";
+        request.pusherSecret = "8dc08dc71ebb470ace7a";
+        // *********************************************************
+
+        // Create an instance of our pusher component using our demo
+        // credentials and the Crypto library.
+        request.pusher = new cfcs.Pusher(
+        appID = request.pusherAppID,
+        appKey = request.pusherKey,
+        appSecret = request.pusherSecret
+        );
+    </cfscript>
+
+
+    <cfset message = {"text" = "BOOM!"} />
+
+    <cfset request.pusher.pushToAllSubscribers(
+			channel = "app-channel",
+			eventType = "message",
+			message = message
+			) />
+
     <cffile action="append" file="C:\ColdFusionBuilder3\ColdFusion\cfusion\wwwroot\mysql-push\sendPush.log" output="#Now()#" />
 
 
