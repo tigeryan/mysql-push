@@ -43,7 +43,7 @@
 <cffunction name="onSessionStart">
     <cfscript>
         Session.started = now();
-0    </cfscript>
+    </cfscript>
     <cflock timeout="5" throwontimeout="No" type="EXCLUSIVE" scope="SESSION">
         <cfset Application.sessions = Application.sessions + 1>
     </cflock>
