@@ -41,7 +41,7 @@ DELIMITER $$
 CREATE TRIGGER `sixfoottiger`.`products_AFTER_UPDATE` AFTER UPDATE ON `products`
 FOR EACH ROW
 BEGIN
-	DECLARE cur1 CURSOR FOR select sys_exec('curl "http://127.0.0.1:8600/mysql-push/push.cfc?method=sendPush"');
+	DECLARE cur1 CURSOR FOR select sys_exec('curl "http://127.0.0.1:8600/mysql-push/push.cfc?method=sendPush');
 	OPEN cur1;
     INSERT INTO product_log(log_text) VALUES(CONCAT('UPDATE: ',NEW.product_id));
 END$$;
