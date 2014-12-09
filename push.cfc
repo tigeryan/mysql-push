@@ -1,84 +1,84 @@
-<cfcomponent>
-<cfset This.name = "TestApplication">
-<cfset This.Sessionmanagement=true>
-<cfset This.Sessiontimeout="#createtimespan(0,0,10,0)#">
-<cfset This.applicationtimeout="#createtimespan(5,0,0,0)#">
+<cfcomponent name="pushCFC" output="false">
+<cfsetting showdebugoutput="false" />
 
-<cffunction name="onApplicationStart">
-
-    <cflog file="#This.Name#" type="Information" text="Application Started">
-    <!--- You do not have to lock code in the onApplicationStart method that sets Application scope variables. --->
-    <cfscript>
-        Application.availableResources=0;
-        Application.counter1=1;
-        Application.sessions=0;
-    </cfscript>
-    <!--- You do not need to return True if you don't set the cffunction returntype attribute. --->
- </cffunction>
-
-<cffunction name="onApplicationEnd">
-    <cfargument name="ApplicationScope" required=true/>
-    <cflog file="#This.Name#" type="Information" text="Application #ApplicationScope.applicationname# Ended">
-</cffunction>
+<!--- Pseudo-constructor --->
+<cfset variables.datasource = application.datasource />
 
 
-<cffunction name="onRequestStart">
+<cffunction name="sendPush" access="remote" output="false" returns="struct">
+
+    <cffile action="append" file="C:\ColdFusionBuilder3\ColdFusion\cfusion\wwwroot\mysql-push\sendPush.log" output="#Now()#" />
+
 
 </cffunction>
 
-<cffunction name="onRequest">
-    <cfargument name = "targetPage" type="String" required=true/>
-    <cfinclude template=#Arguments.targetPage#>
+<!--- *** AUTHORIZATION & REGISTRATION *** --->
+<!--- This should be called via HTTPS --->
+<cffunction name="authUser" access="remote" output="false" returns="struct">
+	<cfargument name="u" type="string" required="true" />
+	<cfargument name="p" type="string" required="true" />
+	<cfargument name="seckey" type="string" required="true" />
 
+	<cfif cgi.REQUEST_METHOD NEQ "POST">
+		<cfreturn returnError('10002') />
+	</cfif>
+
+	<cfif cgi.HTTPS NEQ "on" AND application.production EQ 1>
+		<cfreturn returnError('10005') />
+	</cfif>
+
+	<cfif arguments.seckey NEQ variables.SEC_KEY>
+		<cfreturn returnError('10000') />
+	</cfif>
+
+	<!---<cfif FindNoCase("mdlinx.com",u) EQ 0 AND FindNoCase("realcme.com",u) EQ 0 AND FindNoCase("usa.m3.com",u) EQ 0 AND FindNoCase("wulung.com",u) EQ 0 AND FindNoCase("realcme.org",u) EQ 0>
+		<cfreturn returnError('10033') />
+	</cfif>--->
+
+	<!--- Is "u" a valid email address? If so, do we even try? --->
+	<cfstoredproc procedure="m3_mdlinx_auth_user" datasource="#variables.datasource#">
+		<cfprocparam cfsqltype="CF_SQL_VARCHAR" value="#lcase(trim(arguments.u))#" />
+		<cfprocparam cfsqltype="CF_SQL_VARCHAR" value="#trim(arguments.p)#" />
+		<cfprocparam cfsqltype="CF_SQL_VARCHAR" value="" />
+		<cfprocresult name="local.get_user" />
+	</cfstoredproc>
+
+	<!--- We need to track the user without setting last login? --->
+	<cfif local.get_user.recordcount EQ 0>
+		<cfreturn returnError('10003') />
+	<cfelse>
+		<cfreturn
+		{ "success"=javaCast("int", local.get_user.recordCount)
+		, "uic"=local.get_user.user_id_code
+		, "fname"=local.get_user.fname
+		, "lname"=local.get_user.lname
+		, "email"=local.get_user.email
+		, "uid"=local.get_user.user_id}
+		/>
+	</cfif>
 </cffunction>
 
-<!--- Display a different footer for logged in users than for guest users or
-         users who have not logged in. --->
 
-<cffunction name="onRequestEnd">
-    <cfargument type="String" name = "targetTemplate" required=true/>
+<!--- *** UTILIZATION *** --->
+<cffunction name="returnError" access="private" output="false" return="struct">
+	<cfargument name="error_id" type="string" required="true" default="00001" />
 
+	<cfmail to="jceci@usa.m3.com" from="jceci@usa.m3.com" subject="Push.cfc ERROR" type="html">
+		RealCME API Error - ERROR ##: #error_id#<br />
+		#DateFormat(Now(),'mm/dd/yyyy')# #TimeFormat(Now(),'mm/dd/yyyy')#<br />
+		<cfdump var="#CGI#">
+		<cfif CGI.REQUEST_METHOD EQ "POST">
+			<cfdump var="#FORM#" />
+		<cfelse>
+			<cfdump var="#URL#" />
+		</cfif>
+	</cfmail>
+
+	<cfreturn {"error"="###error_id#"} />
 </cffunction>
-
-<cffunction name="onSessionStart">
-    <cfscript>
-        Session.started = now();
-    </cfscript>
-    <cflock timeout="5" throwontimeout="No" type="EXCLUSIVE" scope="SESSION">
-        <cfset Application.sessions = Application.sessions + 1>
-    </cflock>
-    <cflog file="#This.Name#" type="Information" text="Session:
-        #Session.sessionid# started">
-</cffunction>
-
-<cffunction name="onSessionEnd">
-    <cfargument name = "SessionScope" required=true/>
-    <!---<cflog file="#This.Name#" type="Information" text="Session:
-            #arguments.SessionScope.sessionid# ended">--->
-</cffunction>
-
-<cffunction name="onError">
-    <cfargument name="Exception" required=true/>
-    <cfargument type="String" name = "EventName" required=true/>
-    <!--- Log all errors. --->
-    <cflog file="#This.Name#" type="error" text="Event Name: #Eventname#">
-    <cflog file="#This.Name#" type="error" text="Message: #exception.message#">
-    <!--- Some exceptions, including server-side validation errors, do not
-             generate a rootcause structure. --->
-    <cfif isdefined("exception.rootcause")>
-        <cflog file="#This.Name#" type="error"
-            text="Root Cause Message: #exception.rootcause.message#">
-    </cfif>
-    <!--- Display an error message if there is a page context. --->
-    <cfif NOT (Arguments.EventName IS onSessionEnd) OR (Arguments.EventName IS onApplicationEnd)>
-        <cfoutput>
-            <h2>An unexpected error occurred.</h2>
-            <p>Please provide the following information to technical support:</p>
-            <p>Error Event: #EventName#</p>
-            <p>Error details:<br>
-            <cfdump var=#exception#></p>
-        </cfoutput>
-    </cfif>
- </cffunction>
 
 </cfcomponent>
+
+
+
+
