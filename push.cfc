@@ -8,9 +8,9 @@
 <cffunction name="sendPush" access="remote" output="false" returns="struct">
 
     <cfscript>
-        request.pusherAppID = "99452";
-        request.pusherKey = "7af9fad3df855a1968e5";
-        request.pusherSecret = "8dc08dc71ebb470ace7a";
+        request.pusherAppID = "0000";
+        request.pusherKey = "0000";
+        request.pusherSecret = "0000";
         // *********************************************************
 
         // Create an instance of our pusher component using our demo
