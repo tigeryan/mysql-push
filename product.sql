@@ -5,55 +5,46 @@ CREATE TABLE `products` (
   PRIMARY KEY (`product_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DELIMITER $$
-CREATE PROCEDURE push_message (p1   DOUBLE,  p2   DOUBLE,  p3 BIGINT)
-BEGIN
- DECLARE cmd CHAR(255);
- DECLARE result CHAR(255);
- SET cmd = CONCAT('curl https://pubsub.pubnub.com/publish/demo/demo/0/mysql_triggers/0/%22',p1, ',' ,p2, ',' ,p3,'%22');
+INSERT INTO `sixfoottiger`.`products`(`product_name`,`product_price`) VALUES('Product 4',5.99);
 
-
-
-
- SET result = sys_eval(cmd);
-END$$;
-
-
-CREATE DEFINER=`root`@`localhost` PROCEDURE `push_message`(p1   DOUBLE,  p2   DOUBLE,  p3 BIGINT)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `push_message2`(p1   DOUBLE,  p2   DOUBLE,  p3 BIGINT)
 BEGIN
  DECLARE cmd TEXT;
  DECLARE result VARCHAR(255);
- SET cmd = 'curl -H \'Content-Type: application/json\' -d \'{"data":"{\"message\":\"hello world\"}","name":"my_event","channel":"test_channel"}\' "http://api.pusherapp.com/apps/99452/events?" "body_md5=8a3501faef6636ca9a5ebbe6f31b5409&" "auth_version=1.0&" "auth_key=7af9fad3df855a1968e5&" "auth_timestamp=1418064913&" "auth_signature=2d729f8def4fb21c8364b45ad426840d39427744f5f4c998946aed208a30aec4&";
- SET result = sys_eval(cmd)';
+ SET cmd = 'curl "http://127.0.0.1:8600/mysql-push/push.cfc?method=sendPush"';
+ SET result = sys_exec(cmd);
 END
 
-
+DELIMITER $$
+CREATE TRIGGER `sixfoottiger`.`products_AFTER_DELETE` AFTER DELETE ON `products`
+FOR EACH ROW
+BEGIN
+    CALL push_message2(0,0,0);
+END$$;
 
 DELIMITER $$
-CREATE PROCEDURE push_message (p1   DOUBLE,  p2   DOUBLE,  p3 BIGINT)
+CREATE TRIGGER `sixfoottiger`.`products_AFTER_INSERT` AFTER INSERT ON `products`
+FOR EACH ROW
 BEGIN
- DECLARE cmd TEXT;
- DECLARE result CHAR(255);
- SET cmd = 'curl -H \'Content-Type: application/json\' -d \'{"data":"{\"message\":\"hello world\"}","name":"my_event","channel":"test_channel"}\' "http://api.pusherapp.com/apps/99452/events?" "body_md5=8a3501faef6636ca9a5ebbe6f31b5409&" "auth_version=1.0&" "auth_key=7af9fad3df855a1968e5&" "auth_timestamp=1418064913&" "auth_signature=2d729f8def4fb21c8364b45ad426840d39427744f5f4c998946aed208a30aec4&"';
- SET result = sys_eval(cmd);
+    CALL push_message2(0,0,0);
+END$$;
+
+DELIMITER $$
+CREATE TRIGGER `sixfoottiger`.`products_AFTER_UPDATE` AFTER UPDATE ON `products`
+FOR EACH ROW
+BEGIN
+    CALL push_message2(0,0,0);
 END$$;
 
 
-SELECT sys_eval('c:/windows/curl -H \'Content-Type: application/json\' -d \'{"data":"{\"message\":\"hello world\"}","name":"my_event","channel":"test_channel"}\' "http://api.pusherapp.com/apps/99452/events?" "body_md5=8a3501faef6636ca9a5ebbe6f31b5409&" "auth_version=1.0&" "auth_key=7af9fad3df855a1968e5&" "auth_timestamp=1418064913&" "auth_signature=2d729f8def4fb21c8364b45ad426840d39427744f5f4c998946aed208a30aec4&"')
-
-CALL push_message(0,0,0);
-
-
-Error Code: 1126. Can't open shared library 'lib_mysqludf_sys.dll' (errno: 193 )
-
-
+show variables like 'plugin_dir';
 
 DROP FUNCTION IF EXISTS sys_eval;
 DROP FUNCTION IF EXISTS sys_exec;
 DROP FUNCTION IF EXISTS sys_get;
 DROP FUNCTION IF EXISTS sys_set;
 
-CREATE FUNCTION sys_eval RETURNS STRING SONAME 'C:\Program Files\MySQL\MySQL Server 5.6\lib\plugin\lib_mysqludf_sys.dll';
+CREATE FUNCTION sys_eval RETURNS STRING SONAME 'lib_mysqludf_sys.dll';
 CREATE FUNCTION sys_exec RETURNS STRING SONAME 'lib_mysqludf_sys.dll';
 CREATE FUNCTION sys_get  RETURNS STRING SONAME 'lib_mysqludf_sys.dll';
 CREATE FUNCTION sys_set  RETURNS STRING SONAME 'lib_mysqludf_sys.dll';
