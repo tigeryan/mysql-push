@@ -15,27 +15,36 @@ BEGIN
  SET result = sys_exec(cmd);
 END
 
+DROP TRIGGER products_AFTER_INSERT;
+DROP TRIGGER products_AFTER_DELETE;
+DROP TRIGGER products_AFTER_UPDATE;
+
 DELIMITER $$
 CREATE TRIGGER `sixfoottiger`.`products_AFTER_DELETE` AFTER DELETE ON `products`
 FOR EACH ROW
 BEGIN
-    CALL push_message2(0,0,0);
+	DECLARE cur1 CURSOR FOR select sys_exec('curl "http://127.0.0.1:8600/mysql-push/push.cfc?method=sendPush"');
+	OPEN cur1;
+    INSERT INTO product_log(log_text) VALUES(CONCAT('delete: ',OLD.product_id));
 END$$;
 
 DELIMITER $$
 CREATE TRIGGER `sixfoottiger`.`products_AFTER_INSERT` AFTER INSERT ON `products`
 FOR EACH ROW
 BEGIN
-    CALL push_message2(0,0,0);
+	DECLARE cur1 CURSOR FOR select sys_exec('curl "http://127.0.0.1:8600/mysql-push/push.cfc?method=sendPush"');
+	OPEN cur1;
+    INSERT INTO product_log(log_text) VALUES(CONCAT('insert: ',NEW.product_id));
 END$$;
 
 DELIMITER $$
 CREATE TRIGGER `sixfoottiger`.`products_AFTER_UPDATE` AFTER UPDATE ON `products`
 FOR EACH ROW
 BEGIN
-    CALL push_message2(0,0,0);
+	DECLARE cur1 CURSOR FOR select sys_exec('curl "http://127.0.0.1:8600/mysql-push/push.cfc?method=sendPush"');
+	OPEN cur1;
+    INSERT INTO product_log(log_text) VALUES(CONCAT('UPDATE: ',NEW.product_id));
 END$$;
-
 
 show variables like 'plugin_dir';
 
