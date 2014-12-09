@@ -28,6 +28,22 @@
 
 <cffunction name="onRequestStart">
 
+    <cfscript>
+        request.pusherAppID = "99452";
+        request.pusherKey = "7af9fad3df855a1968e5";
+        request.pusherSecret = "8dc08dc71ebb470ace7a";
+        // *********************************************************
+
+        // Create an instance of our pusher component using our demo
+        // credentials and the Crypto library.
+        request.pusher = new cfcs.Pusher(
+        appID = request.pusherAppID,
+        appKey = request.pusherKey,
+        appSecret = request.pusherSecret
+        );
+    </cfscript>
+
+
 </cffunction>
 
 <cffunction name="onRequest">
