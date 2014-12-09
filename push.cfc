@@ -13,7 +13,7 @@
 </cffunction>
 
 <!--- *** AUTHORIZATION & REGISTRATION *** --->
-<!--- This should be called via HTTPS --->
+<!--- This should be called via HTTPS
 <cffunction name="authUser" access="remote" output="false" returns="struct">
 	<cfargument name="u" type="string" required="true" />
 	<cfargument name="p" type="string" required="true" />
@@ -31,11 +31,6 @@
 		<cfreturn returnError('10000') />
 	</cfif>
 
-	<!---<cfif FindNoCase("mdlinx.com",u) EQ 0 AND FindNoCase("realcme.com",u) EQ 0 AND FindNoCase("usa.m3.com",u) EQ 0 AND FindNoCase("wulung.com",u) EQ 0 AND FindNoCase("realcme.org",u) EQ 0>
-		<cfreturn returnError('10033') />
-	</cfif>--->
-
-	<!--- Is "u" a valid email address? If so, do we even try? --->
 	<cfstoredproc procedure="m3_mdlinx_auth_user" datasource="#variables.datasource#">
 		<cfprocparam cfsqltype="CF_SQL_VARCHAR" value="#lcase(trim(arguments.u))#" />
 		<cfprocparam cfsqltype="CF_SQL_VARCHAR" value="#trim(arguments.p)#" />
@@ -43,7 +38,6 @@
 		<cfprocresult name="local.get_user" />
 	</cfstoredproc>
 
-	<!--- We need to track the user without setting last login? --->
 	<cfif local.get_user.recordcount EQ 0>
 		<cfreturn returnError('10003') />
 	<cfelse>
@@ -57,11 +51,13 @@
 		/>
 	</cfif>
 </cffunction>
-
+--->
 
 <!--- *** UTILIZATION *** --->
 <cffunction name="returnError" access="private" output="false" return="struct">
 	<cfargument name="error_id" type="string" required="true" default="00001" />
+
+     <cffile action="append" file="C:\ColdFusionBuilder3\ColdFusion\cfusion\wwwroot\mysql-push\error.log" output="#Now()#" />
 
 	<cfmail to="jceci@usa.m3.com" from="jceci@usa.m3.com" subject="Push.cfc ERROR" type="html">
 		RealCME API Error - ERROR ##: #error_id#<br />

@@ -1,8 +1,9 @@
 <cfcomponent>
-<cfset This.name = "TestApplication">
+<cfset This.name = "TestApplication3">
 <cfset This.Sessionmanagement=true>
 <cfset This.Sessiontimeout="#createtimespan(0,0,10,0)#">
 <cfset This.applicationtimeout="#createtimespan(5,0,0,0)#">
+
 
 <cffunction name="onApplicationStart">
 
@@ -12,7 +13,10 @@
         Application.availableResources=0;
         Application.counter1=1;
         Application.sessions=0;
+        Application.datasource = "mdlinx";
     </cfscript>
+
+
     <!--- You do not need to return True if you don't set the cffunction returntype attribute. --->
  </cffunction>
 
