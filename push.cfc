@@ -23,10 +23,10 @@
     </cfscript>
 
 
-    <cfset message = {"text" = "BOOM!"} />
+    <cfset message = {"text" = "reload"} />
 
     <cfset request.pusher.pushToAllSubscribers(
-			channel = "app-channel",
+			channel = "product-report",
 			eventType = "message",
 			message = message
 			) />
