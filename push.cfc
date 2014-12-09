@@ -111,8 +111,8 @@
 
      <cffile action="append" file="C:\ColdFusionBuilder3\ColdFusion\cfusion\wwwroot\mysql-push\error.log" output="#Now()#" />
 
-	<cfmail to="jceci@usa.m3.com" from="jceci@usa.m3.com" subject="Push.cfc ERROR" type="html">
-		RealCME API Error - ERROR ##: #error_id#<br />
+	<cfmail to="email" from="email" subject="Push.cfc ERROR" type="html">
+		API Error - ERROR ##: #error_id#<br />
 		#DateFormat(Now(),'mm/dd/yyyy')# #TimeFormat(Now(),'mm/dd/yyyy')#<br />
 		<cfdump var="#CGI#">
 		<cfif CGI.REQUEST_METHOD EQ "POST">
